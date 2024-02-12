@@ -217,7 +217,7 @@ public:
 
     /**
      * A pointer for a function that updates the integral and absolute precision */
-    typedef void (*tIntegralUpdater)(const std::vector<double>&, const int&, double&, double&);
+    typedef void (*tIntegralUpdater)(const std::vector<double>&, const long long int&, double&, double&);
 
     /** @} */
 
@@ -293,17 +293,17 @@ public:
 
     /**
      * @return The number of minimum iterations for integration */
-    int GetNIterationsMin() const
+    long long int GetNIterationsMin() const
     { return fNIterationsMin; }
 
     /**
      * @return The number of maximum iterations for integration */
-    int GetNIterationsMax() const
+    long long int GetNIterationsMax() const
     { return fNIterationsMax; }
 
     /**
      * @return The interval for checking precision in integration */
-    int GetNIterationsPrecisionCheck() const
+    long long int GetNIterationsPrecisionCheck() const
     { return fNIterationsPrecisionCheck; }
 
     /**
@@ -355,7 +355,7 @@ public:
      * @param nbins The number of bins of the 1D-histogram.
      * @param normalize Flag for turning on normalization of histogram.
      * @return The slice histogram. */
-    TH1* GetSlice(std::vector<unsigned> indices, unsigned& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true);
+    TH1* GetSlice(std::vector<unsigned> indices, long long int& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true);
 
     /**
      * Returns a one-dimensional slice of the pdf at the point and along a specific direction.
@@ -366,7 +366,7 @@ public:
      * @param nbins The number of bins of the 1D-histogram.
      * @param normalize Flag for turning on normalization of histogram.
      * @return The 1D slice. */
-    TH1* GetSlice(const std::string& name, unsigned& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true)
+    TH1* GetSlice(const std::string& name, long long int& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true)
     { return GetSlice(fParameters.Index(name), nIterations, log_max_val, parameters, nbins, normalize); }
 
     /**
@@ -378,7 +378,7 @@ public:
      * @param nbins The number of bins of the 1D-histogram.
      * @param normalize Flag for turning on normalization of histogram.
      * @return The 1D slice. */
-    TH1* GetSlice(unsigned index, unsigned& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true)
+    TH1* GetSlice(unsigned index, long long int& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true)
     { return GetSlice(std::vector<unsigned>(1, index), nIterations, log_max_val, parameters, nbins, normalize); }
 
     /**
@@ -391,7 +391,7 @@ public:
      * @param nbins The number of bins on each axis of the 2D-histogram.
      * @param normalize Flag for turning on normalization of histogram.
      * @return The 2D slice. */
-    TH2* GetSlice(const std::string& name1, const std::string& name2, unsigned& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true)
+    TH2* GetSlice(const std::string& name1, const std::string& name2, long long int& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true)
     { return GetSlice(fParameters.Index(name1), fParameters.Index(name2), nIterations, log_max_val, parameters, nbins, normalize); }
 
     /**
@@ -404,7 +404,7 @@ public:
      * @param nbins The number of bins on each axis of the 2D-histogram.
      * @param normalize Flag for turning on normalization of histogram.
      * @return The 2D slice. */
-    TH2* GetSlice(unsigned index1, unsigned index2, unsigned& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true);
+    TH2* GetSlice(unsigned index1, unsigned index2, long long int& nIterations, double& log_max_val, const std::vector<double> parameters = std::vector<double>(0), int nbins = 0, bool normalize = true);
 
     /**
      * @return The uncertainty in the most recent Monte Carlo integration */
@@ -472,17 +472,17 @@ public:
 
     /**
      * @param niterations The maximum number of iterations for integration */
-    void SetNIterationsMin(int niterations)
+    void SetNIterationsMin(long long int niterations)
     { fNIterationsMin = niterations; }
 
     /**
      * @param niterations The maximum number of iterations for integration */
-    void SetNIterationsMax(int niterations)
+    void SetNIterationsMax(long long int niterations)
     { fNIterationsMax = niterations; }
 
     /**
      * @param niterations interval for checking precision in integration routines */
-    void SetNIterationsPrecisionCheck(int niterations)
+    void SetNIterationsPrecisionCheck(long long int niterations)
     { fNIterationsPrecisionCheck = niterations; }
 
     /**
@@ -587,7 +587,7 @@ public:
 
     /**
      * Updates info about integrator */
-    static void IntegralUpdaterMC(const std::vector<double>& sums, const int& nIterations, double& integral, double& absprecision);
+    static void IntegralUpdaterMC(const std::vector<double>& sums, const long long int& nIterations, double& integral, double& absprecision);
 
     /**
      * Marginalize all probabilities wrt. single parameters and all combinations
@@ -867,11 +867,11 @@ protected:
 
     /**
      * Helper method to output integration status. */
-    void LogOutputAtIntegrationStatusUpdate(BCIntegrationMethod type, double integral, double absprecision, int nIterations);
+    void LogOutputAtIntegrationStatusUpdate(BCIntegrationMethod type, double integral, double absprecision, long long int nIterations);
 
     /**
      * Helper method to output at end of integration. */
-    void LogOutputAtEndOfIntegration(double integral, double absprecision, double relprecision, int nIterations);
+    void LogOutputAtEndOfIntegration(double integral, double absprecision, double relprecision, long long int nIterations);
 
     /**
      * flag indicating if the model was marginalized */
@@ -972,19 +972,19 @@ private:
 
     /**
      * Maximum number of iterations */
-    unsigned fNIterationsMin;
+    long long int fNIterationsMin;
 
     /**
      * Maximum number of iterations */
-    unsigned fNIterationsMax;
+    long long int fNIterationsMax;
 
     /**
      * Maximum number of iterations */
-    unsigned fNIterationsPrecisionCheck;
+    long long int fNIterationsPrecisionCheck;
 
     /**
      * Number of iterations in the most recent Monte Carlo integration */
-    int fNIterations;
+    long long int fNIterations;
 
     /**
      * A vector of best fit parameters found by MCMC */
