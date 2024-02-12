@@ -505,7 +505,7 @@ double BCIntegrate::Integrate(BCIntegrationMethod type, tRandomizer randomizer, 
 
     // reset number of iterations
     fNIterations = 0;
-    bool accepted;
+    bool accepted = false;
 
     // iterate while number of iterations is lower than minimum number of iterations
     // or precision is not reached and the number of iterations is lower than maximum number of iterations
