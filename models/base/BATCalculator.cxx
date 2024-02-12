@@ -34,8 +34,6 @@
 #include <algorithm>
 #include <cassert>
 
-ClassImp(RooStats::BATCalculator)
-
 namespace
 {
 //help function for calculating the shortest interval
