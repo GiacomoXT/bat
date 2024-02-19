@@ -97,6 +97,24 @@ AC_ARG_WITH(
 AC_ARG_WITH(cuba_include_dir, AS_HELP_STRING([--with-cuba-include-dir=DIR    path to cuba.h file]))
 AC_ARG_WITH(cuba_lib_dir,     AS_HELP_STRING([--with-cuba-lib-dir=DIR        path to libcuba.a file]))
 
+dnl Use long long int for the Cuba interface if requested
+AC_ARG_ENABLE(
+  [cuba-long-long-int],
+  [AS_HELP_STRING(
+    [--enable-cuba-long-long-int],
+    [Enable usage of long long int type instead of int when using the Cuba interface (default: no)]
+  )],
+  [
+    AC_MSG_RESULT([using long long int for the Cuba interface])
+    cuba_long_long_int=$enableval
+  ],
+  [
+    AC_MSG_RESULT([using int for the Cuba interface])
+    cuba_long_long_int=no
+  ]
+)
+
+AM_CONDITIONAL([CUBA_LONG_LONG_INT], [test x$cuba_long_long_int = xyes])
 
 AC_CHECK_PROGS(CURL, curl, false)
 AC_CHECK_PROGS(WGET, wget, false)

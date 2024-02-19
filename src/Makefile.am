@@ -19,6 +19,10 @@ if CUBA
 libBAT_la_LIBADD += $(CUBALIB)
 endif
 
+if CUBA_LONG_LONG_INT
+AM_CXXFLAGS += -DUSE_CUBA_LONG_LONG_INT
+endif
+
 if IS_DARWIN
 CREATE_SO_LINK = cd $(DESTDIR)$(libdir); rm -f libBAT.so; ln -s libBAT.dylib libBAT.so
 endif
