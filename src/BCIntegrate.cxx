@@ -464,26 +464,39 @@ void BCIntegrate::LogOutputAtStartOfIntegration(BCIntegrationMethod type, BCCuba
     }
 
     if (GetNIterationsMin() > 0 && GetNIterationsMax() > 0 ) {
+#ifdef USE_CUBA_LONG_LONG_INT
         BCLog::Out(level, Form(" --> Minimum number of iterations: %lli", GetNIterationsMin()));
         BCLog::Out(level, Form(" --> Maximum number of iterations: %lli", GetNIterationsMax()));
+#else
+        BCLog::Out(level, Form(" --> Minimum number of iterations: %i", GetNIterationsMin()));
+        BCLog::Out(level, Form(" --> Maximum number of iterations: %i", GetNIterationsMax()));
+#endif
     }
     BCLog::Out(level, Form(" --> Target relative precision:    %e", GetRelativePrecision()));
     BCLog::Out(level, Form(" --> Target absolute precision:    %e", GetAbsolutePrecision()));
 }
 
 // ---------------------------------------------------------
-void BCIntegrate::LogOutputAtEndOfIntegration(double integral, double absprecision, double relprecision, long long int nIterations)
+void BCIntegrate::LogOutputAtEndOfIntegration(double integral, double absprecision, double relprecision, CubaInt nIterations)
 {
     BCLog::OutSummary(Form(" --> Result of integration:        %e +- %e", integral, absprecision));
     BCLog::OutSummary(Form(" --> Obtained relative precision:  %e. ", relprecision));
     if (nIterations >= 0)
+#ifdef USE_CUBA_LONG_LONG_INT
         BCLog::OutSummary(Form(" --> Number of iterations:         %lli", nIterations));
+#else
+        BCLog::OutSummary(Form(" --> Number of iterations:         %i", nIterations));
+#endif
 }
 
 // ---------------------------------------------------------
-void BCIntegrate::LogOutputAtIntegrationStatusUpdate(BCIntegrationMethod type, double integral, double absprecision, long long int nIterations)
+void BCIntegrate::LogOutputAtIntegrationStatusUpdate(BCIntegrationMethod type, double integral, double absprecision, CubaInt nIterations)
 {
+#ifdef USE_CUBA_LONG_LONG_INT
     BCLog::OutDetail(Form("%s. Iteration %lli, integral: %e +- %e.", DumpIntegrationMethod(type).c_str(), nIterations, integral, absprecision));
+#else
+    BCLog::OutDetail(Form("%s. Iteration %i, integral: %e +- %e.", DumpIntegrationMethod(type).c_str(), nIterations, integral, absprecision));
+#endif
 }
 
 // ---------------------------------------------------------
@@ -501,7 +514,7 @@ double BCIntegrate::Integrate(BCIntegrationMethod type, tRandomizer randomizer, 
     std::vector<double> randx (GetNParameters(), 0.);
 
     // how often to print out the info line to screen
-    long long int nwrite = UpdateFrequency(fNIterationsMax);
+    CubaInt nwrite = UpdateFrequency(fNIterationsMax);
 
     // reset number of iterations
     fNIterations = 0;
@@ -569,7 +582,7 @@ double BCIntegrate::EvaluatorMC(std::vector<double>& sums, const std::vector<dou
 }
 
 // ---------------------------------------------------------
-void BCIntegrate::IntegralUpdaterMC(const std::vector<double>& sums, const long long int& nIterations, double& integral, double& absprecision)
+void BCIntegrate::IntegralUpdaterMC(const std::vector<double>& sums, const CubaInt& nIterations, double& integral, double& absprecision)
 {
     // sample mean including the volume of the parameter space
     integral = sums[2] * sums[0] / nIterations;
@@ -716,7 +729,7 @@ int BCIntegrate::MarginalizeAll()
             fH2Marginalized.assign(GetNParameters(), std::vector<TH2*>(GetNParameters(), NULL));
 
             // count how often posterior is evaluated
-            long long int nIterations = 0;
+            CubaInt nIterations = 0;
 
             // store highest probability
             double log_max_val = -std::numeric_limits<double>::infinity();
@@ -837,7 +850,7 @@ int BCIntegrate::MarginalizeAll(BCIntegrate::BCMarginalizationMethod margmethod)
 }
 
 // ---------------------------------------------------------
-TH1* BCIntegrate::GetSlice(std::vector<unsigned> indices, long long int& nIterations, double& log_max_val, const std::vector<double> parameters, int nbins, bool normalize)
+TH1* BCIntegrate::GetSlice(std::vector<unsigned> indices, CubaInt& nIterations, double& log_max_val, const std::vector<double> parameters, int nbins, bool normalize)
 {
     if (indices.empty()) {
         BCLog::OutError("BCIntegrate::GetSlice : No parameter indices provided.");
@@ -995,7 +1008,7 @@ TH1* BCIntegrate::GetSlice(std::vector<unsigned> indices, long long int& nIterat
 }
 
 // ---------------------------------------------------------
-TH2* BCIntegrate::GetSlice(unsigned index1, unsigned index2, long long int& nIterations, double& log_max_val, const std::vector<double> parameters, int nbins, bool normalize)
+TH2* BCIntegrate::GetSlice(unsigned index1, unsigned index2, CubaInt& nIterations, double& log_max_val, const std::vector<double> parameters, int nbins, bool normalize)
 {
     std::vector<unsigned> indices(1, index1);
     indices.push_back(index2);
@@ -1576,37 +1589,47 @@ double BCIntegrate::IntegrateCuba(BCCubaMethod cubatype)
     switch (cubatype) {
 
         case BCIntegrate::kCubaVegas:
-            llVegas(nIntegrationVariables, ncomp,
-                  &BCIntegrate::CubaIntegrand, static_cast<void*>(this),
-                  nvec,
-                  fRelativePrecision, fAbsolutePrecision,
-                  fCubaVegasOptions.flags, fRandom.GetSeed(),
-                  fNIterationsMin, fNIterationsMax,
-                  fCubaVegasOptions.nstart, fCubaVegasOptions.nincrease, fCubaVegasOptions.nbatch,
-                  gridno, statefile,
-#if CUBAVERSION > 33
-                  spin,
+#ifdef USE_CUBA_LONG_LONG_INT
+            llVegas(
+#else
+            Vegas(
 #endif
-                  &fNIterations, &fail,
-                  &integral[0], &error[0], &prob[0]);
+                nIntegrationVariables, ncomp,
+                &BCIntegrate::CubaIntegrand, static_cast<void*>(this),
+                nvec,
+                fRelativePrecision, fAbsolutePrecision,
+                fCubaVegasOptions.flags, fRandom.GetSeed(),
+                fNIterationsMin, fNIterationsMax,
+                fCubaVegasOptions.nstart, fCubaVegasOptions.nincrease, fCubaVegasOptions.nbatch,
+                gridno, statefile,
+#if CUBAVERSION > 33
+                spin,
+#endif
+                &fNIterations, &fail,
+                &integral[0], &error[0], &prob[0]);
             break;
 
         case BCIntegrate::kCubaSuave:
-            llSuave(nIntegrationVariables, ncomp,
-                  &BCIntegrate::CubaIntegrand, static_cast<void*>(this),
-                  nvec,
-                  fRelativePrecision, fAbsolutePrecision,
-                  fCubaSuaveOptions.flags, fRandom.GetSeed(),
-                  fNIterationsMin, fNIterationsMax, fCubaSuaveOptions.nnew,
+#ifdef USE_CUBA_LONG_LONG_INT
+            llSuave(
+#else
+            Suave(
+#endif
+                nIntegrationVariables, ncomp,
+                &BCIntegrate::CubaIntegrand, static_cast<void*>(this),
+                nvec,
+                fRelativePrecision, fAbsolutePrecision,
+                fCubaSuaveOptions.flags, fRandom.GetSeed(),
+                fNIterationsMin, fNIterationsMax, fCubaSuaveOptions.nnew,
 #if CUBAVERSION > 40
-                  fCubaSuaveOptions.nmin,
+                fCubaSuaveOptions.nmin,
 #endif
-                  fCubaSuaveOptions.flatness, statefile,
+                fCubaSuaveOptions.flatness, statefile,
 #if CUBAVERSION > 33
-                  spin,
+                spin,
 #endif
-                  &nregions, &fNIterations, &fail,
-                  &integral[0], &error[0], &prob[0]);
+                &nregions, &fNIterations, &fail,
+                &integral[0], &error[0], &prob[0]);
             break;
 
         case BCIntegrate::kCubaDivonne:
@@ -1616,22 +1639,27 @@ double BCIntegrate::IntegrateCuba(BCCubaMethod cubatype)
                 // no extra info supported
                 static const int ngiven = 0;
                 static const int nextra = ngiven;
-                llDivonne(nIntegrationVariables, ncomp,
-                        &BCIntegrate::CubaIntegrand, static_cast<void*>(this),
-                        nvec,
-                        fRelativePrecision, fAbsolutePrecision,
-                        fCubaDivonneOptions.flags, fRandom.GetSeed(),
-                        fNIterationsMin, fNIterationsMax,
-                        fCubaDivonneOptions.key1, fCubaDivonneOptions.key2, fCubaDivonneOptions.key3,
-                        fCubaDivonneOptions.maxpass, fCubaDivonneOptions.border,
-                        fCubaDivonneOptions.maxchisq, fCubaDivonneOptions.mindeviation,
-                        ngiven, nIntegrationVariables /*ldxgiven*/, NULL, nextra, NULL,
-                        statefile,
-#if CUBAVERSION > 33
-                        spin,
+#ifdef USE_CUBA_LONG_LONG_INT
+                llDivonne(
+#else
+                Divonne(
 #endif
-                        &nregions, &fNIterations, &fail,
-                        &integral[0], &error[0], &prob[0]);
+                    nIntegrationVariables, ncomp,
+                    &BCIntegrate::CubaIntegrand, static_cast<void*>(this),
+                    nvec,
+                    fRelativePrecision, fAbsolutePrecision,
+                    fCubaDivonneOptions.flags, fRandom.GetSeed(),
+                    fNIterationsMin, fNIterationsMax,
+                    fCubaDivonneOptions.key1, fCubaDivonneOptions.key2, fCubaDivonneOptions.key3,
+                    fCubaDivonneOptions.maxpass, fCubaDivonneOptions.border,
+                    fCubaDivonneOptions.maxchisq, fCubaDivonneOptions.mindeviation,
+                    ngiven, nIntegrationVariables /*ldxgiven*/, NULL, nextra, NULL,
+                    statefile,
+#if CUBAVERSION > 33
+                    spin,
+#endif
+                    &nregions, &fNIterations, &fail,
+                    &integral[0], &error[0], &prob[0]);
             }
             break;
 
@@ -1639,18 +1667,23 @@ double BCIntegrate::IntegrateCuba(BCCubaMethod cubatype)
             if (nIntegrationVariables < 2)
                 BCLog::OutError("BCIntegrate::IntegrateCuba(Cuhre): Cuhre(cubature) only works in d > 1");
 
-            llCuhre(nIntegrationVariables, ncomp,
-                  &BCIntegrate::CubaIntegrand, static_cast<void*>(this),
-                  nvec,
-                  fRelativePrecision, fAbsolutePrecision,
-                  fCubaCuhreOptions.flags, fNIterationsMin, fNIterationsMax,
-                  fCubaCuhreOptions.key,
-                  statefile,
-#if CUBAVERSION > 33
-                  spin,
+#ifdef USE_CUBA_LONG_LONG_INT
+            llCuhre(
+#else
+            Cuhre(
 #endif
-                  &nregions, &fNIterations, &fail,
-                  &integral[0], &error[0], &prob[0]);
+                nIntegrationVariables, ncomp,
+                &BCIntegrate::CubaIntegrand, static_cast<void*>(this),
+                nvec,
+                fRelativePrecision, fAbsolutePrecision,
+                fCubaCuhreOptions.flags, fNIterationsMin, fNIterationsMax,
+                fCubaCuhreOptions.key,
+                statefile,
+#if CUBAVERSION > 33
+                spin,
+#endif
+                &nregions, &fNIterations, &fail,
+                &integral[0], &error[0], &prob[0]);
             break;
 
         case BCIntegrate::NCubaMethods:
@@ -1666,7 +1699,11 @@ double BCIntegrate::IntegrateCuba(BCCubaMethod cubatype)
 
     if (fail != 0) {
         BCLog::OutWarning(" Warning, integral did not converge with the given set of parameters. ");
+#ifdef USE_CUBA_LONG_LONG_INT
         BCLog::OutWarning(Form(" neval    = %lld", fNIterations));
+#else
+        BCLog::OutWarning(Form(" neval    = %d", fNIterations));
+#endif
         BCLog::OutWarning(Form(" fail     = %d", fail));
         BCLog::OutWarning(Form(" integral = %e", result));
         BCLog::OutWarning(Form(" error    = %e", fError));
@@ -1765,7 +1802,7 @@ double BCIntegrate::IntegrateSlice()
         integral = -1;
     }
 
-    long long int nIterations = 0;
+    CubaInt nIterations = 0;
     double log_max_val = -std::numeric_limits<double>::infinity();
 
     // get slice, without normalizing
