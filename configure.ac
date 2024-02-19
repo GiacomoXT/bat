@@ -43,7 +43,7 @@ AC_ARG_ENABLE(
 if test x$debug = xtrue ; then
   AC_SUBST([AM_CXXFLAGS], '-g -O0 -Wall -Wextra -pedantic -Wno-long-long -Wno-unknown-pragmas')
 else
-  AC_SUBST([AM_CXXFLAGS], '-O2 -Wno-unknown-pragmas')
+  AC_SUBST([AM_CXXFLAGS], '-O3 -Wno-unknown-pragmas')
 fi
 
 dnl
